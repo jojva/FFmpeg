@@ -3,6 +3,7 @@ Installation et exécution étape par étape.
 La commande ./configure active le débogage, désactive tous les codecs et multiplexeurs/démultiplexeurs sauf le décodeur h264, les démultiplexeurs avi, mpegts, mpegtsraw et matroska (.mkv) pour compiler plus vite.
 Pour tester avec d'autres formats/codecs il faut activer les bons démultiplexeurs et décodeurs.
 
+
 1° Installer la FFmpeg :
 
 git clone https://github.com/jojva/FFmpeg.git
@@ -15,11 +16,13 @@ sudo make
 
 sudo make install
 
+
 2° Compiler :
 
 /* Dans le dossier FFmpeg/extract : */
 
 make
+
 
 3° Exécuter :
 
@@ -27,10 +30,23 @@ make
 
 ./pktdumper video.MTS [nombre de paquets à extraire]
 
-/* xtract extrait les images d'une vidéo une par une, oeil gauche - oeil droit - oeil gauche - oeil droit... */
+
+/* xtract extrait les images d'une vidéo une par une, oeil gauche - oeil droit - oeil gauche - oeil droit... 
+ * L'extraction ne fonctionne pas sur les 6 premières images droites, elles sont essentiellement vertes.
+ * Les images suivantes sont en revanche bien extraites, jusqu'à un certain point. Aux alentours de la 300ème image des artefacts apparaissent, et il n'y a que les images gauches qui sont extraites.
+ * Des fuites mémoires importantes sont également présentes, de l'ordre de 1Mo/sec. Cela est dû au fait que je ne libère pas les paquets une fois qu'ils ont été décodés. je m'attelerai à cette tâche dès que possible
+ * Enfin, les images qui sont bien extraites sont entrelacées, il me restera donc après ces corrections à les désentrelacer.
+*/
 
 ./xtract video.MTS
 ou
 ./xtract video.MTS &> log
 
-4° 
+
+4° Pour lire rapidement les modifications que j'ai effectuées sur la FFmpeg :
+
+/* Dans le dossier FFmpeg/ */
+
+git diff cde1e7d libavcodec/
+
+/* Le commit cde1e7d est le dernier avant mon fork de la FFmpeg */
