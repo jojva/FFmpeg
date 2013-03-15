@@ -539,6 +539,69 @@ fail:
     return -1;
 }
 
+void ff_h264_decode_subset_seq_parameter_set(H264Context *h)
+{
+    ff_h264_decode_seq_parameter_set(h);
+
+    SPS *sps = &h->sps;
+    int profile_idc = sps->profile_idc;
+    int num_views;
+    int i,j;
+    int view_id[2];
+    int num_anchor_refs_l0[2];
+    int num_anchor_refs_l1[2];
+    int anchor_ref_l0[2][2];
+    int anchor_ref_l1[2][2];
+    int num_non_anchor_refs_l0[2];
+    int num_non_anchor_refs_l1[2];
+    int non_anchor_ref_l0[2][2];
+    int non_anchor_ref_l1[2][2];
+    int num_level_values_signalled;
+    int level_idc;
+
+    if (profile_idc == 118 || profile_idc == 128) {
+	get_bits1(&h->gb);
+	num_views = get_ue_golomb(&h->gb) + 1;
+	av_log(NULL, AV_LOG_INFO, "num_views:%d\n", num_views);
+	for(i = 0; i < num_views; i++) {
+	    view_id[i] = get_ue_golomb(&h->gb);
+	    av_log(NULL, AV_LOG_INFO, "view_id[%d]:%d\n", i, view_id[i]);
+	}
+	for(i = 1; i < num_views; i++) {
+	    num_anchor_refs_l0[i] = get_ue_golomb(&h->gb);
+	    av_log(NULL, AV_LOG_INFO, "num_anchor_refs_l0[%d]:\t%d\n", i, num_anchor_refs_l0[i]);
+	    for(j = 0; j < num_anchor_refs_l0[i]; j++) {
+		anchor_ref_l0[i][j] = get_ue_golomb(&h->gb);
+		av_log(NULL, AV_LOG_INFO, "anchor_ref_l0[%d][%d]:\t%d\n", i, j, anchor_ref_l0[i][j]);
+	    }
+	    num_anchor_refs_l1[i] = get_ue_golomb(&h->gb);
+	    av_log(NULL, AV_LOG_INFO, "num_anchor_refs_l1[%d]:\t%d\n", i, num_anchor_refs_l1[i]);
+	    for(j = 0; j < num_anchor_refs_l1[i]; j++) {
+		anchor_ref_l1[i][j] = get_ue_golomb(&h->gb);
+		av_log(NULL, AV_LOG_INFO, "anchor_ref_l1[%d][%d]:\t%d\n", i, j, anchor_ref_l1[i][j]);
+	    }
+	}
+	for(i = 1; i < num_views; i++) {
+	    num_non_anchor_refs_l0[i] = get_ue_golomb(&h->gb);
+	    av_log(NULL, AV_LOG_INFO, "num_non_anchor_refs_l0[%d]:\t%d\n", i, num_non_anchor_refs_l0[i]);
+	    for(j = 0; j < num_non_anchor_refs_l0[i]; j++) {
+		non_anchor_ref_l0[i][j] = get_ue_golomb(&h->gb);
+		av_log(NULL, AV_LOG_INFO, "non_anchor_ref_l0[%d][%d]:\t%d\n", i, j, non_anchor_ref_l0[i][j]);
+	    }
+	    num_non_anchor_refs_l1[i] = get_ue_golomb(&h->gb);
+	    av_log(NULL, AV_LOG_INFO, "num_non_anchor_refs_l1[%d]:\t%d\n", i, num_non_anchor_refs_l1[i]);
+	    for(j = 0; j < num_non_anchor_refs_l1[i]; j++) {
+		non_anchor_ref_l1[i][j] = get_ue_golomb(&h->gb);
+		av_log(NULL, AV_LOG_INFO, "non_anchor_ref_l1[%d][%d]:\t%d\n", i, j, non_anchor_ref_l1[i][j]);
+	    }
+	}
+	num_level_values_signalled = get_ue_golomb(&h->gb) + 1;
+	av_log(NULL, AV_LOG_INFO, "num_level_values_signalled:%d\n", num_level_values_signalled);
+	level_idc = get_bits(&h->gb, 8);
+	av_log(NULL, AV_LOG_INFO, "level_idc:%d\n", level_idc);	
+    }
+}
+
 static void
 build_qp_table(PPS *pps, int t, int index, const int depth)
 {

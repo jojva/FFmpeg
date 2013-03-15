@@ -115,7 +115,11 @@ enum {
     NAL_END_STREAM,
     NAL_FILLER_DATA,
     NAL_SPS_EXT,
+    NAL_PREF,
+    NAL_SUB_SPS,
     NAL_AUXILIARY_SLICE = 19,
+    NAL_SLICE_EXT,
+    NAL_VDRD = 24,        ///< View Dependency Representation Delimiter, not specified in ITU-T's h264 spec.
     NAL_FF_IGNORE       = 0xff0f001,
 };
 
@@ -502,8 +506,8 @@ typedef struct H264Context {
     int delta_poc_bottom;
     int delta_poc[2];
     int frame_num;
-    int prev_poc_msb;           ///< poc_msb of the last reference pic for POC type 0
-    int prev_poc_lsb;           ///< poc_lsb of the last reference pic for POC type 0
+    int prev_poc_msb[2];           ///< poc_msb of the last reference pic for POC type 0
+    int prev_poc_lsb[2];           ///< poc_lsb of the last reference pic for POC type 0
     int frame_num_offset;       ///< for POC type 2
     int prev_frame_num_offset;  ///< for POC type 2
     int prev_frame_num;         ///< frame_num of the last pic for POC type 1/2
@@ -521,7 +525,7 @@ typedef struct H264Context {
     int redundant_pic_count;
 
     Picture default_ref_list[2][32]; ///< base reference list for all slices of a coded picture
-    Picture *short_ref[32];
+    Picture *short_ref[2][32];
     Picture *long_ref[32];
     Picture *delayed_pic[MAX_DELAYED_PIC_COUNT + 2]; // FIXME size?
     int last_pocs[MAX_DELAYED_PIC_COUNT];
@@ -537,7 +541,7 @@ typedef struct H264Context {
     int mmco_reset;
 
     int long_ref_count;     ///< number of actual long term references
-    int short_ref_count;    ///< number of actual short term references
+    int short_ref_count[2];    ///< number of actual short term references
 
     int cabac_init_idc;
 
@@ -651,6 +655,9 @@ typedef struct H264Context {
     AVBufferPool *mb_type_pool;
     AVBufferPool *motion_val_pool;
     AVBufferPool *ref_index_pool;
+
+    int voidx;
+    int non_idr_flag;
 } H264Context;
 
 extern const uint8_t ff_h264_chroma_qp[7][QP_MAX_NUM + 1]; ///< One chroma qp table for each possible bit depth (8-14).
@@ -665,6 +672,11 @@ int ff_h264_decode_sei(H264Context *h);
  * Decode SPS
  */
 int ff_h264_decode_seq_parameter_set(H264Context *h);
+
+/**
+ * Decode Subset SPS
+ */
+void ff_h264_decode_subset_seq_parameter_set(H264Context *h);
 
 /**
  * compute profile from sps
