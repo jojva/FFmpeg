@@ -1,0 +1,36 @@
+Installation et exécution étape par étape.
+
+La commande ./configure active le débogage, désactive tous les codecs et multiplexeurs/démultiplexeurs sauf le décodeur h264, les démultiplexeurs avi, mpegts, mpegtsraw et matroska (.mkv) pour compiler plus vite.
+Pour tester avec d'autres formats/codecs il faut activer les bons démultiplexeurs et décodeurs.
+
+1° Installer la FFmpeg :
+
+git clone https://github.com/jojva/FFmpeg.git
+
+/* Dans le dossier FFmpeg : */
+
+./configure --enable-coverage --enable-debug=3 --enable-extra-warnings --assert-level=2 --disable-optimizations --disable-programs --disable-doc --disable-encoders --disable-decoders --enable-decoder=h264 --disable-muxers --disable-filters --disable-demuxers --enable-demuxer=avi --enable-demuxer=mpegts --enable-demuxer=mpegtsraw --enable-demuxer=matroska
+
+sudo make
+
+sudo make install
+
+2° Compiler :
+
+/* Dans le dossier FFmpeg/extract : */
+
+make
+
+3° Exécuter :
+
+/* pktdumper extrait les paquets démultiplexés d'une vidéo */
+
+./pktdumper video.MTS [nombre de paquets à extraire]
+
+/* xtract extrait les images d'une vidéo une par une, oeil gauche - oeil droit - oeil gauche - oeil droit... */
+
+./xtract video.MTS
+ou
+./xtract video.MTS &> log
+
+4° 

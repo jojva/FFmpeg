@@ -68,3 +68,17 @@
 /tools/qt-faststart
 /tools/trasher
 /tools/seek_print
+
+*~
+*.gcno
+*.gcda
+*.ppm
+extract/out/
+extract/pic/
+extract/*log
+extract/*.MTS
+extract/*.avi
+extract/*.mp4
+extract/*.gz
+extract/pktdumper
+extract/xtract
