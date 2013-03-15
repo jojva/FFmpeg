@@ -1,0 +1,5 @@
+Fix green pictures
+Why isn't it working after about 300 pics ? Only left frames
+Deinterlace pics
+Be able to extract non-ref frames
+Fix those big memory leaks (> 1MB/sec)

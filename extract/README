@@ -1,14 +1,14 @@
-Installation et exécution étape par étape.
+Installation and execution step by step.
 
-La commande ./configure active le débogage, désactive tous les codecs et multiplexeurs/démultiplexeurs sauf le décodeur h264, les démultiplexeurs avi, mpegts, mpegtsraw et matroska (.mkv) pour compiler plus vite.
-Pour tester avec d'autres formats/codecs il faut activer les bons démultiplexeurs et décodeurs.
+./configure command enables debugging, disables every codecs et muxers/demuxers except for h264 decoder, and avi, mpegts, mpegtsraw and matroska (.mkv) demuxers to build faster.
+To try out with other formats/codecs, the right demuxers/decoders have to be enabled.
 
 
-1° Installer la FFmpeg :
+1° Install FFmpeg :
 
 git clone https://github.com/jojva/FFmpeg.git
 
-/* Dans le dossier FFmpeg : */
+/* In FFmpeg folder : */
 
 ./configure --enable-coverage --enable-debug=3 --enable-extra-warnings --assert-level=2 --disable-optimizations --disable-programs --disable-doc --disable-encoders --disable-decoders --enable-decoder=h264 --disable-muxers --disable-filters --disable-demuxers --enable-demuxer=avi --enable-demuxer=mpegts --enable-demuxer=mpegtsraw --enable-demuxer=matroska
 
@@ -17,36 +17,36 @@ sudo make
 sudo make install
 
 
-2° Compiler :
+2° Build test programs :
 
-/* Dans le dossier FFmpeg/extract : */
+/* In FFmpeg/extract folder : */
 
 make
 
 
-3° Exécuter :
+3° Run :
 
-/* pktdumper extrait les paquets démultiplexés d'une vidéo */
-
-./pktdumper video.MTS [nombre de paquets à extraire]
-
-
-/* xtract extrait les images d'une vidéo une par une, oeil gauche - oeil droit - oeil gauche - oeil droit... 
- * L'extraction ne fonctionne pas sur les 6 premières images droites, elles sont essentiellement vertes.
- * Les images suivantes sont en revanche bien extraites, jusqu'à un certain point. Aux alentours de la 300ème image des artefacts apparaissent, et il n'y a que les images gauches qui sont extraites.
- * Des fuites mémoires importantes sont également présentes, de l'ordre de 1Mo/sec. Cela est dû au fait que je ne libère pas les paquets une fois qu'ils ont été décodés. je m'attelerai à cette tâche dès que possible
- * Enfin, les images qui sont bien extraites sont entrelacées, il me restera donc après ces corrections à les désentrelacer.
+/* xtract (tries to) extract the frames of a video, in this output order : left eye - right eye - left eye - right eye... 
+ * Extraction doesn't work on the first right frames (~6), being mainly green.
+ * Next frames are fine, but only reference frames (Intra-frames and Predictive-frames) are extracted and only to a certain point. Around the 300th frame, artefacts begin to appear, and only left frames are extracted.
+ * There are important memory leaks, around 1MB/sec. This is due to the fact that packets aren't freed after they've been decoded.
+ * Finally, the frames are interlaced, they'll have to be deinterlaced.
 */
 
 ./xtract video.MTS
-ou
+or
 ./xtract video.MTS &> log
 
 
-4° Pour lire rapidement les modifications que j'ai effectuées sur la FFmpeg :
+/* pktdumper extracts the demuxed packets of a video */
 
-/* Dans le dossier FFmpeg/ */
+./pktdumper video.MTS [number of packets to extract]
+
+
+4° To see quickly the modifications I've made to the "original" FFmpeg :
+
+/* In FFmpeg/ folder : */
 
 git diff cde1e7d libavcodec/
 
-/* Le commit cde1e7d est le dernier avant mon fork de la FFmpeg */
+/* Commit cde1e7d is the last one before this fork of FFmpeg */
