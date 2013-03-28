@@ -4632,18 +4632,21 @@ again:
             err = 0;
 
             switch (hx->nal_unit_type) {
-            case NAL_IDR_SLICE:
-                if (first_slice != NAL_IDR_SLICE) {
-                    av_log(h->avctx, AV_LOG_ERROR,
-                           "Invalid mix of idr and non-idr slices\n");
-                    buf_index = -1;
-                    goto end;
-                }
-                if(!idr_cleared)
-                    idr(h); // FIXME ensure we don't lose some frames if there is reordering
-                idr_cleared = 1;
+            case NAL_IDR_SLICE:               
             case NAL_SLICE:
 	    case NAL_SLICE_EXT:
+		if(hx->nal_unit_type == NAL_IDR_SLICE || hx->non_idr_flag == 0) {
+		    if (first_slice != NAL_IDR_SLICE) {
+			av_log(h->avctx, AV_LOG_ERROR,
+			       "Invalid mix of idr and non-idr slices\n");
+			buf_index = -1;
+			goto end;
+		    }
+		    if(!idr_cleared)
+			idr(h); // FIXME ensure we don't lose some frames if there is reordering
+		    idr_cleared = 1;
+		}
+		
                 init_get_bits(&hx->gb, ptr, bit_length);
                 hx->intra_gb_ptr        =
                     hx->inter_gb_ptr    = &hx->gb;
@@ -4930,8 +4933,9 @@ not_extra:
         /* Wait for second field. */
         *got_frame = 0;
         if (h->next_output_pic && (h->next_output_pic->sync || h->sync>1)) {
-            if ((ret = av_frame_ref(pict, &h->next_output_pic->f)) < 0)
-                return ret;
+	    av_log(NULL, AV_LOG_DEBUG, "Outputting poc %d/%d, view %d\n", h->next_output_pic->field_poc[0], h->next_output_pic->field_poc[1], h->next_output_pic->voidx);           
+	    if ((ret = av_frame_ref(pict, &h->next_output_pic->f)) < 0)
+                return ret;	    
             *got_frame = 1;
             if (CONFIG_MPEGVIDEO) {
                 ff_print_debug_info2(h->avctx, h->next_output_pic, pict, h->er.mbskip_table,

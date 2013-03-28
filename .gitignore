@@ -70,6 +70,7 @@
 /tools/seek_print
 
 *~
+*#
 *.gcno
 *.gcda
 *.ppm

@@ -1,5 +1,15 @@
-Fix green pictures
-Why isn't it working after about 300 pics ? Only left frames
-Deinterlace pics
-Be able to extract non-ref frames
+Better deinterlacing (yadif instead of avpicture_deinterlace())
+Add missing pieces (mpegts sometimes splits 1 VDRD into 2 packets -> merge them)
 Fix those big memory leaks (> 1MB/sec)
+Why isn't it working after about 300 pics ? Only left frames
+Be able to extract non-ref frames
+Fix green pictures
+
+Mr. Mansencal :
+Check the video is MTS
+Compare the results with Sony Vegas Pro
+
+For my followers :
+Write refs to h264 as much as possible.
+Comment the things I've changed in FFmpeg (also in the Mémoire). Say that I used Stéphane Dranger's tutorial and the file doc/examples/filtering_video.c (if it's till relevant) and also pktdumper.c
+-> So that it can be picked up by someone else easily

@@ -175,6 +175,8 @@ typedef struct Picture{
 
     int reference;
     int shared;
+
+    int voidx;
 } Picture;
 
 /**

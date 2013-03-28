@@ -460,8 +460,8 @@ static void print_short_term(H264Context *h) {
         av_log(h->avctx, AV_LOG_DEBUG, "short term list:\n");
         for(i=0; i<h->short_ref_count[h->voidx]; i++){
             Picture *pic= h->short_ref[h->voidx][i];
-            av_log(h->avctx, AV_LOG_DEBUG, "%d fn:%d poc:%d %p\n",
-                   i, pic->frame_num, pic->poc, pic->f.data[0]);
+            av_log(h->avctx, AV_LOG_DEBUG, "%d fn:%d poc:%d view:%d %p\n",
+                   i, pic->frame_num, pic->poc, pic->voidx, pic->f.data[0]);
         }
     }
 }
@@ -536,6 +536,9 @@ int ff_h264_execute_ref_pic_marking(H264Context *h, MMCO *mmco, int mmco_count){
     int i, av_uninit(j);
     int current_ref_assigned=0, err=0;
     Picture *av_uninit(pic);
+    static int first_time = 0;
+    first_time++;
+    h->cur_pic_ptr->voidx = h->voidx;
 
     if((h->avctx->debug&FF_DEBUG_MMCO) && mmco_count==0)
         av_log(h->avctx, AV_LOG_DEBUG, "no mmco here\n");
@@ -652,10 +655,16 @@ int ff_h264_execute_ref_pic_marking(H264Context *h, MMCO *mmco, int mmco_count){
                 err = AVERROR_INVALIDDATA;
             }
 
-            if(h->short_ref_count)
+            if(h->short_ref_count[h->voidx])
                 memmove(&h->short_ref[h->voidx][1], &h->short_ref[h->voidx][0], h->short_ref_count[h->voidx]*sizeof(Picture*));
 
             h->short_ref[h->voidx][0]= h->cur_pic_ptr;
+	    /* Joris. Bad hacking to force the first frames to have a reference to look for */
+	    if(first_time == 3 && h->voidx == 0) {
+		av_log(NULL, AV_LOG_DEBUG, "Prout !\n");
+		h->short_ref[1][0] = h->cur_pic_ptr;
+		h->short_ref_count[1]++;
+	    }
             h->short_ref_count[h->voidx]++;
             h->cur_pic_ptr->reference |= h->picture_structure;
 

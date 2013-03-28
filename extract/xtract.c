@@ -7,11 +7,14 @@
 #include "libavcodec/avcodec.h"
 #include "libswscale/swscale.h"
 
+//#define DEINTERLACE 1
+
 void SaveFrame(AVFrame *pFrame, int width, int height, int iFrame)
 {
     FILE *pFile;
     char szFilename[32];
     int y;
+
     sprintf(szFilename, "frame%d.ppm", iFrame);
     pFile = fopen(szFilename, "wb");
     if (pFile == NULL)
@@ -31,12 +34,26 @@ void DecodePacket(AVCodecContext *pCodecCtx, AVFrame *pFrame, AVFrame *pFrameRGB
     av_log(NULL, AV_LOG_INFO, "Fin paquet, stream %d, outputting %d\n", pkt->stream_index, frameFinished ? i : -1);
 
     if (frameFinished){
+	
+#ifdef DEINTERLACE
+	avpicture_deinterlace((AVPicture *)pFrame, (AVPicture *)pFrame,
+			      pFrame->format, pFrame->width, pFrame->height);
+#endif
+
 	struct SwsContext *ctx = sws_getContext(pCodecCtx->width, pCodecCtx->height, pCodecCtx->pix_fmt, pCodecCtx->width,
 						pCodecCtx->height, PIX_FMT_RGB24, SWS_FAST_BILINEAR, NULL, NULL, NULL);
 	sws_scale(ctx, (const uint8_t * const*)pFrame->data, pFrame->linesize, 0, pCodecCtx->height,
 		  pFrameRGB->data, pFrameRGB->linesize);
+#ifdef DEINTERLACE
+	// When deinterlacing, only extract frames 15-16,27-28,39-40,51-52 which work whereas others don't
+	/* if(i >= 15 && ((i - 15) % 12 == 0 || (i - 16) % 12 == 0)) */
+	if(i >= 14 && ((i - 14) % 12 == 0 || (i - 15) % 12 == 0))
+	    SaveFrame(pFrameRGB, pCodecCtx->width, pCodecCtx->height, i);
+#else
+	SaveFrame(pFrameRGB, pCodecCtx->width, pCodecCtx->height, i);
+#endif
 
-	SaveFrame(pFrameRGB, pCodecCtx->width, pCodecCtx->height, i++);
+	i++;
     }
 }
 
