@@ -4591,6 +4591,7 @@ static int decode_nal_units(H264Context *h, const uint8_t *buf, int buf_size,
                 case NAL_DPA:
                 case NAL_IDR_SLICE:
                 case NAL_SLICE:
+		case NAL_SLICE_EXT:
                     init_get_bits(&hx->gb, ptr, bit_length);
                     if (!get_ue_golomb(&hx->gb) || !first_slice)
                         nals_needed = nal_index;
@@ -4605,6 +4606,7 @@ static int decode_nal_units(H264Context *h, const uint8_t *buf, int buf_size,
                 case NAL_DPA:
                 case NAL_IDR_SLICE:
                 case NAL_SLICE:
+		case NAL_SLICE_EXT:
                     first_slice = hx->nal_unit_type;
                 }
 
@@ -4636,7 +4638,7 @@ again:
             case NAL_SLICE:
 	    case NAL_SLICE_EXT:
 		if(hx->nal_unit_type == NAL_IDR_SLICE || hx->non_idr_flag == 0) {
-		    if (first_slice != NAL_IDR_SLICE) {
+		    if (first_slice != NAL_IDR_SLICE && first_slice != NAL_SLICE_EXT) {
 			av_log(h->avctx, AV_LOG_ERROR,
 			       "Invalid mix of idr and non-idr slices\n");
 			buf_index = -1;
