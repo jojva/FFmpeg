@@ -1,7 +1,6 @@
 Better deinterlacing (yadif instead of avpicture_deinterlace())
 Add missing pieces (mpegts sometimes splits 1 VDRD into 2 packets -> merge them)
 Fix those big memory leaks (> 1MB/sec)
-Why isn't it working after about 300 pics ? Only left frames
 Be able to extract non-ref frames
 Fix green pictures
 

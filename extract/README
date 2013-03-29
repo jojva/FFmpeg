@@ -27,10 +27,10 @@ make
 3° Run :
 
 /* xtract (tries to) extract the frames of a video, in this output order : left eye - right eye - left eye - right eye... 
- * Extraction doesn't work on the first right frames (~6), being mainly green.
- * Next frames are fine, but only reference frames (Intra-frames and Predictive-frames) are extracted and only to a certain point. Around the 300th frame, artefacts begin to appear, and only left frames are extracted.
- * There are important memory leaks, around 1MB/sec. This is due to the fact that packets aren't freed after they've been decoded.
- * Finally, the frames are interlaced, they'll have to be deinterlaced.
+ * Extraction doesn't work on the first frames following an IDR - Instant Decoding Refresh - (~ every 250 frames).
+ * Only reference frames (Intra-frames and Predictive-frames) are extracted.
+ * There are important memory leaks, around 1MB/sec.
+ * Deinterlacing is supported by uncommenting the macro #define DEINTERLACE 1. Deinterlacing works only on 1 couple of frames out of 6
 */
 
 ./xtract video.MTS

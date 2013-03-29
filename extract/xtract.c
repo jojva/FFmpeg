@@ -47,7 +47,7 @@ void DecodePacket(AVCodecContext *pCodecCtx, AVFrame *pFrame, AVFrame *pFrameRGB
 #ifdef DEINTERLACE
 	// When deinterlacing, only extract frames 15-16,27-28,39-40,51-52 which work whereas others don't
 	/* if(i >= 15 && ((i - 15) % 12 == 0 || (i - 16) % 12 == 0)) */
-	if(i >= 14 && ((i - 14) % 12 == 0 || (i - 15) % 12 == 0))
+	/* if(i >= 14 && ((i - 14) % 12 == 0 || (i - 15) % 12 == 0)) */
 	    SaveFrame(pFrameRGB, pCodecCtx->width, pCodecCtx->height, i);
 #else
 	SaveFrame(pFrameRGB, pCodecCtx->width, pCodecCtx->height, i);
@@ -161,12 +161,13 @@ int main(int argc, char *argv[])
     avpicture_fill((AVPicture *) pFrameRGB, buffer, PIX_FMT_RGB24,
 		   pCodecCtx->width, pCodecCtx->height);  
 
-    av_log_set_level(AV_LOG_DEBUG);
+    /* av_log_set_level(AV_LOG_DEBUG); */
+    av_log_set_level(AV_LOG_PANIC);
     pCodecCtx->debug |= FF_DEBUG_PICT_INFO;
     pCodecCtx->debug |= FF_DEBUG_MMCO;
     
-    avcpkt = malloc(50 * sizeof(AVPacket));
-    mvcpkt = malloc(50 * sizeof(AVPacket));
+    avcpkt = av_malloc(50 * sizeof(AVPacket));
+    mvcpkt = av_malloc(50 * sizeof(AVPacket));
     avc_cnt = mvc_cnt = 0;
     for(;;) {
 	while(avc_cnt < 2 || mvc_cnt < 1) {
@@ -210,9 +211,10 @@ int main(int argc, char *argv[])
     	DecodePacket(pCodecCtx, pFrame, pFrameRGB, &mvcsplit1);
     	DecodePacket(pCodecCtx, pFrame, pFrameRGB, &mvcsplit2);	
 	
-	/* av_free(&avcpkt[0]); */
-	/* av_free(&avcpkt[1]); */
-	/* av_free(&mvcpkt[0]); */
+	av_free_packet(&avcpkt[0]);
+	av_free_packet(&avcpkt[1]);
+	av_free_packet(&mvcpkt[0]);
+
 
 	for(i = 0; i < avc_cnt - 2; i++) {
 	    avcpkt[i] = avcpkt[i+2];
@@ -292,6 +294,9 @@ int main(int argc, char *argv[])
     /* } */
 
  end:
+
+    av_free(avcpkt);
+    av_free(mvcpkt);
 
     // Free the RGB image
     av_free(buffer);

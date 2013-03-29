@@ -1,6 +1,6 @@
 CC=gcc
-CFLAGS= --coverage -g
-LDFLAGS= -lswscale -lavformat -lavcodec -lm -lavutil
+CFLAGS= --coverage -g -I/usr/local/include
+LDFLAGS= -L/usr/local/lib -lswscale -lavformat -lavcodec -lm -lavutil
 
 %OBJ= pktdumper.o xtract.o
 
